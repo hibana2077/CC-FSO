@@ -9,7 +9,7 @@
 #PBS -l storage=scratch/rp06
 
 module load cuda/12.6.2
-module load python3/3.10.4
+# module load python3/3.10.4
 
 nvidia-smi >> gpu-info.txt
 
