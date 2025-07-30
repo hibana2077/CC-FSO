@@ -4,10 +4,9 @@
 #PBS -l ngpus=1            
 #PBS -l ncpus=16            
 #PBS -l mem=10GB           
-#PBS -l walltime=00:00:20  
+#PBS -l walltime=00:00:30  
 #PBS -l wd                  
 #PBS -l storage=scratch/rp06
-
 
 module load cuda/12.6.2
 module load python3/3.10.4
