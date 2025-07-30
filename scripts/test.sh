@@ -4,7 +4,7 @@
 #PBS -l ngpus=1            
 #PBS -l ncpus=16            
 #PBS -l mem=50GB           
-#PBS -l walltime=00:00:20  
+#PBS -l walltime=00:00:50  
 #PBS -l wd                  
 #PBS -l storage=scratch/rp06
 
@@ -16,5 +16,5 @@ nvidia-smi >> gpu-info.txt
 cd ..
 
 source /scratch/rp06/sl5952/CC-FSO/.venv/bin/activate
-python3 exp/test.py >> out1.txt
+python3 test_implementation.py >> out1.txt
 
