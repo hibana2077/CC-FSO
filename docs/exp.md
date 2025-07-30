@@ -30,7 +30,7 @@
 - **實驗設計**：
   - 在5個UFGVC子集上評估所提方法(Curvature-Aware Loss, CAL)
   - 比較指標：Top-1準確率、類間/類內距離比、收斂速度
-  - 基線方法：ResNet-50、Swin Transformer、Mix-ViT、CLE-ViT
+  - 基線方法：ResNet-50(timm)、Swin Transformer(timm)
   - 每個實驗重複5次，報告平均結果和標準差
 
 - **數據收集**：
@@ -107,7 +107,7 @@
 
 ### 2.5 與現有方法的對比實驗
 - **實驗設計**：
-  - 與17種現有方法進行全面對比，包括：
+  - 與17種現有方法進行全面對比，包括：(這裡只需要跑timm支援的模型 其他使用他們論文提供的數據)
     - 傳統CNN：ResNet-50, VGG-16
     - 細粒度方法：DCL, MaskCOV, SPARE
     - 對比學習方法：SimCLR, MoCo v2, BYOL
