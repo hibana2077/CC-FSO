@@ -8,6 +8,8 @@ timm
 scikit-learn
 
 # Data processing
+pyarrow
+fastparquet
 pandas
 Pillow
 requests
