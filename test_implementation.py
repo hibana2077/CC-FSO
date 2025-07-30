@@ -163,7 +163,7 @@ def test_dataset():
         # Test dataset creation (this will download data)
         dataset = UFGVCDataset(
             dataset_name='cotton80',
-            root='./test_data',
+            root='./data',
             split='train',
             download=True
         )

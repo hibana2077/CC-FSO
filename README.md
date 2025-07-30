@@ -223,7 +223,7 @@ metrics = tracker.get_latest_metrics()
   title={黎曼流形上的超細粒度視覺分類：曲率約束的特徵空間優化理論},
   author={hibana2077},
   journal={arXiv preprint},
-  year={2024}
+  year={2025}
 }
 ```
 
