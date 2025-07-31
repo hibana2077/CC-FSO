@@ -66,12 +66,18 @@ class RiemannianGeometry:
         det_g = torch.det(metric_tensor)
         trace_g = torch.trace(metric_tensor)
         
+        # Ensure determinant is positive for numerical stability
+        det_g = torch.abs(det_g) + self.eps
+        
         # Discrete approximation of Ricci curvature
         # κ ≈ -1/2 * Δlog(√det(g)) where Δ is the Laplacian
-        log_sqrt_det = 0.5 * torch.log(det_g + self.eps)
+        log_sqrt_det = 0.5 * torch.log(det_g)
         
         # Simple approximation using trace and determinant
-        ricci_scalar = -0.5 * (trace_g / (det_g + self.eps) - self.manifold_dim)
+        ricci_scalar = -0.5 * (trace_g / det_g - self.manifold_dim)
+        
+        # Clamp to reasonable range to avoid numerical issues
+        ricci_scalar = torch.clamp(ricci_scalar, -10.0, 10.0)
         
         return ricci_scalar
     

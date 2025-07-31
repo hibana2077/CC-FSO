@@ -79,7 +79,7 @@ class MetricsTracker:
         self.targets.extend(targets.cpu().numpy())
         
         if features is not None:
-            self.features.extend(features.cpu().numpy())
+            self.features.extend(features.detach().cpu().numpy())
         
         if loss is not None:
             self.losses.append(loss)
@@ -324,6 +324,9 @@ class UFGVCTrainer:
             
             # Backward pass
             loss.backward()
+            
+            # Gradient clipping to prevent NaN gradients
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             
             # Get current curvature for optimizer
             current_kappa = 0.0
@@ -686,7 +689,7 @@ class UFGVCTrainer:
         if self.use_wandb:
             wandb.log({"training_history": wandb.Image(fig)})
         
-        plt.show()
+        # plt.show()
 
 
 def create_trainer(model_name: str,

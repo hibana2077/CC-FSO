@@ -305,19 +305,23 @@ class InfoNCEWithCurvature(nn.Module):
             if negative_mask.sum() == 0:
                 continue
             
-            # Compute loss for sample i
-            positive_logits = similarity_matrix[i][positive_mask]
-            negative_logits = similarity_matrix[i][negative_mask]
+            # Compute loss for sample i using standard InfoNCE formulation
+            anchor_sim = similarity_matrix[i]  # Similarities to all other samples
             
-            # InfoNCE loss
-            all_logits = torch.cat([positive_logits, negative_logits])
-            targets = torch.zeros(len(positive_logits), dtype=torch.long, device=device)
+            # For each positive, compute InfoNCE loss
+            positive_indices = torch.where(positive_mask)[0]
             
-            loss_i = F.cross_entropy(
-                all_logits.unsqueeze(0).repeat(len(positive_logits), 1),
-                targets
-            )
-            losses.append(loss_i)
+            for pos_idx in positive_indices:
+                # Numerator: similarity to positive sample
+                pos_sim = anchor_sim[pos_idx]
+                
+                # Denominator: sum of exp(similarities) to all negatives + this positive
+                neg_sims = anchor_sim[negative_mask]
+                all_sims = torch.cat([pos_sim.unsqueeze(0), neg_sims])
+                
+                # InfoNCE loss: -log(exp(pos_sim) / sum(exp(all_sims)))
+                loss_i = -pos_sim + torch.logsumexp(all_sims, dim=0)
+                losses.append(loss_i)
         
         if len(losses) == 0:
             return torch.tensor(0.0, device=device, requires_grad=True)
@@ -371,8 +375,8 @@ class TripletLossWithCurvature(nn.Module):
                 continue
             
             # Sample positive and negative
-            pos_idx = positive_indices[torch.randint(len(positive_indices), (1,))]
-            neg_idx = negative_indices[torch.randint(len(negative_indices), (1,))]
+            pos_idx = positive_indices[torch.randint(len(positive_indices), (1,)).item()]
+            neg_idx = negative_indices[torch.randint(len(negative_indices), (1,)).item()]
             
             positive = features[pos_idx]
             negative = features[neg_idx]
@@ -399,8 +403,8 @@ class CombinedLoss(nn.Module):
     
     def __init__(self, 
                  feature_dim: int,
-                 cal_weight: float = 1.0,
-                 ce_weight: float = 0.1,
+                 cal_weight: float = 0.1,  # Reduced weight
+                 ce_weight: float = 1.0,   # Increased weight 
                  triplet_weight: float = 0.1):
         super().__init__()
         
@@ -426,15 +430,40 @@ class CombinedLoss(nn.Module):
         Returns:
             Total loss and component losses
         """
-        # Component losses
-        cal_loss = self.cal_loss(features, labels)
+        # Debug: Check for NaN in inputs
+        if torch.isnan(features).any():
+            print(f"NaN detected in features! Shape: {features.shape}")
+        if torch.isnan(logits).any():
+            print(f"NaN detected in logits! Shape: {logits.shape}")
+        
+        # Component losses with error handling
+        try:
+            cal_loss = self.cal_loss(features, labels)
+            # Clamp to prevent extreme values
+            cal_loss = torch.clamp(cal_loss, -100.0, 100.0)
+        except Exception as e:
+            print(f"Error in CAL loss: {e}")
+            cal_loss = torch.tensor(0.0, device=features.device, requires_grad=True)
+            
         ce_loss = self.ce_loss(logits, labels)
-        triplet_loss = self.triplet_loss(features, labels)
+        
+        try:
+            triplet_loss = self.triplet_loss(features, labels)
+            # Clamp to prevent extreme values
+            triplet_loss = torch.clamp(triplet_loss, -100.0, 100.0)
+        except Exception as e:
+            print(f"Error in triplet loss: {e}")
+            triplet_loss = torch.tensor(0.0, device=features.device, requires_grad=True)
         
         # Combined loss
         total_loss = (self.cal_weight * cal_loss + 
                      self.ce_weight * ce_loss + 
                      self.triplet_weight * triplet_loss)
+        
+        # Final safety check
+        if torch.isnan(total_loss) or torch.isinf(total_loss):
+            print(f"Invalid total loss detected: {total_loss}, cal: {cal_loss}, ce: {ce_loss}, triplet: {triplet_loss}")
+            total_loss = ce_loss  # Fallback to cross-entropy only
         
         components = {
             'cal_loss': cal_loss,
