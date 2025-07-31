@@ -2,7 +2,7 @@
 #PBS -P rp06
 #PBS -q gpuvolta
 #PBS -l ngpus=1            
-#PBS -l ncpus=24            
+#PBS -l ncpus=12            
 #PBS -l mem=20GB           
 #PBS -l walltime=00:60:00  
 #PBS -l wd                  
