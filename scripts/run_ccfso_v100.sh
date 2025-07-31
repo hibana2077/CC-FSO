@@ -16,5 +16,5 @@ nvidia-smi >> gpu-info.txt
 cd ..
 
 source /scratch/rp06/sl5952/CC-FSO/.venv/bin/activate
-python3 train.py --dataset cotton80 --model resnet50 --loss ce --optimizer riemannian_sgd --epochs 100 --batch_size 32 --lr 0.001 >> out_v100.txt
+python3 train.py --dataset cotton80 --model resnet50 --loss ce --optimizer riemannian_sgd --epochs 100 --batch_size 32 --lr 0.001 --feature_dim 2048 >> out_v100.txt
 
