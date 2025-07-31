@@ -375,15 +375,24 @@ def main():
             
             # Save test results
             test_results_path = os.path.join(args.save_dir, f'{args.experiment_name}_test_results.json')
-            # Convert numpy arrays to lists for JSON serialization
-            json_results = {}
-            for key, value in test_results.items():
-                if isinstance(value, np.ndarray):
-                    json_results[key] = value.tolist()
-                elif isinstance(value, dict):
-                    json_results[key] = {str(k): v for k, v in value.items()}
+            
+            # Helper function to convert numpy types to Python types
+            def convert_numpy_types(obj):
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                elif isinstance(obj, np.integer):
+                    return int(obj)
+                elif isinstance(obj, np.floating):
+                    return float(obj)
+                elif isinstance(obj, dict):
+                    return {str(k): convert_numpy_types(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_numpy_types(item) for item in obj]
                 else:
-                    json_results[key] = value
+                    return obj
+            
+            # Convert all numpy types to JSON-serializable types
+            json_results = convert_numpy_types(test_results)
             
             with open(test_results_path, 'w') as f:
                 json.dump(json_results, f, indent=2)
