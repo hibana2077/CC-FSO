@@ -47,12 +47,12 @@ def parse_args():
                       help='Dataset to use')
     parser.add_argument('--data_root', type=str, default='./data',
                       help='Root directory for datasets')
-    parser.add_argument('--image_size', type=int, default=384,
-                      help='Input image size')
+    parser.add_argument('--image_size', type=int, default=224,
+                      help='Input image size. Must be compatible with chosen model (e.g., 224 for models with _224, 384 for models with _384)')
     
     # Model arguments
     parser.add_argument('--model', type=str, default='swin_base_patch4_window7_224',
-                      help='Model architecture')
+                      help='Model architecture. Note: model name should match --image_size (e.g., model with 224 in name requires --image_size 224)')
     parser.add_argument('--feature_dim', type=int, default=512,
                       help='Feature dimension for Riemannian manifold')
     parser.add_argument('--pretrained', action='store_true', default=True,
@@ -116,6 +116,52 @@ def parse_args():
                       help='Random seed')
     
     return parser.parse_args()
+
+
+def validate_model_image_size_compatibility(model_name: str, image_size: int) -> None:
+    """
+    Validate that the model and image_size are compatible
+    
+    Args:
+        model_name: Name of the model architecture
+        image_size: Target image size
+        
+    Raises:
+        ValueError: If model and image_size are incompatible
+    """
+    # Extract expected size from model name if it contains size info
+    if '224' in model_name and image_size != 224:
+        if 'swin' in model_name.lower() or 'vit' in model_name.lower():
+            raise ValueError(
+                f"Model '{model_name}' expects input size 224x224, but --image_size {image_size} was specified.\n"
+                f"Solutions:\n"
+                f"  1. Use --image_size 224\n"
+                f"  2. Use a different model that supports {image_size}x{image_size} inputs:\n"
+                f"     - For 384x384: vit_small_patch16_384, swin_base_patch4_window7_384 (if available)\n"
+                f"     - For flexible sizes: resnet50, resnet101, efficientnet models"
+            )
+    
+    elif '384' in model_name and image_size != 384:
+        if 'swin' in model_name.lower() or 'vit' in model_name.lower():
+            raise ValueError(
+                f"Model '{model_name}' expects input size 384x384, but --image_size {image_size} was specified.\n"
+                f"Solutions:\n"
+                f"  1. Use --image_size 384\n"
+                f"  2. Use a different model that supports {image_size}x{image_size} inputs"
+            )
+    
+    # Provide helpful suggestions for common cases
+    if image_size == 384 and '224' in model_name:
+        suggested_models = []
+        if 'vit' in model_name.lower():
+            suggested_models.append('vit_small_patch16_384')
+            suggested_models.append('vit_base_patch16_384')
+        elif 'swin' in model_name.lower():
+            suggested_models.append('swin_base_patch4_window12_384')
+            suggested_models.append('swin_large_patch4_window12_384')
+        
+        if suggested_models:
+            print(f"💡 Tip: For --image_size 384, consider using these models: {', '.join(suggested_models)}")
 
 
 def get_device(device_arg: str) -> torch.device:
@@ -213,6 +259,13 @@ def create_dataloaders(args):
 def main():
     """Main training function"""
     args = parse_args()
+    
+    # Validate model and image_size compatibility
+    try:
+        validate_model_image_size_compatibility(args.model, args.image_size)
+    except ValueError as e:
+        print(f"❌ Configuration Error: {e}")
+        sys.exit(1)
     
     # Set seed for reproducibility
     set_seed(args.seed)
