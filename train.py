@@ -260,13 +260,6 @@ def main():
     """Main training function"""
     args = parse_args()
     
-    # Validate model and image_size compatibility
-    try:
-        validate_model_image_size_compatibility(args.model, args.image_size)
-    except ValueError as e:
-        print(f"❌ Configuration Error: {e}")
-        sys.exit(1)
-    
     # Set seed for reproducibility
     set_seed(args.seed)
     
@@ -274,6 +267,8 @@ def main():
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     
+    logger.info(f"Image size: {args.image_size}")
+
     # Get device
     device = get_device(args.device)
     
