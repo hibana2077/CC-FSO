@@ -17,5 +17,5 @@ cd ..
 
 source /scratch/rp06/sl5952/CC-FSO/.venv/bin/activate
 # python3 train.py --dataset cotton80 --model resnet50 --loss ce --optimizer riemannian_sgd --epochs 100 --batch_size 32 --lr 0.001 --feature_dim 2048 >> out_v100.txt
-python3 train.py --dataset cotton80 --model resnet50 --loss ce --optimizer adam --epochs 100 --batch_size 32 --lr 0.0001 --feature_dim 2048 >> out_v100.txt
+python3 train.py --dataset cotton80 --model tiny_vit_21m_384 --loss ce --optimizer adamw --epochs 100 --batch_size 32 --lr 0.0001 --image_size 384 --feature_dim 2048 >> out_v100.txt
 

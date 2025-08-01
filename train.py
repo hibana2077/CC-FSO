@@ -79,7 +79,7 @@ def parse_args():
     
     # Optimizer arguments
     parser.add_argument('--optimizer', type=str, default='riemannian_sgd',
-                      choices=['riemannian_sgd', 'riemannian_adam', 'adam', 'sgd'],
+                      choices=['riemannian_sgd', 'riemannian_adam', 'adam', 'sgd', 'adamw'],
                       help='Optimizer to use')
     parser.add_argument('--scheduler', type=str, default='cosine',
                       choices=['cosine', 'step', 'curvature'],
@@ -92,7 +92,7 @@ def parse_args():
                       help='Use contrastive augmentation')
     
     # Training settings
-    parser.add_argument('--num_workers', type=int, default=4,
+    parser.add_argument('--num_workers', type=int, default=8,
                       help='Number of workers for data loading')
     parser.add_argument('--save_dir', type=str, default='./checkpoints',
                       help='Directory to save checkpoints')
