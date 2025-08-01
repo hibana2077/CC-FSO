@@ -163,10 +163,18 @@ class ViTWithRiemannianHead(nn.Module):
             num_classes=0,  # Remove classification head
             global_pool='token'
         )
+
+        # Get image size from model name
+        if '224' in model_name:
+            self.image_size = 224
+        elif '384' in model_name:
+            self.image_size = 384
+        else:
+            raise ValueError(f"Unsupported model: {model_name}. Expected image size 224 or 384.")
         
         # Get backbone output dimension
         with torch.no_grad():
-            dummy_input = torch.randn(1, 3, 224, 224)
+            dummy_input = torch.randn(1, 3, self.image_size, self.image_size)
             backbone_dim = self.backbone(dummy_input).shape[-1]
         
         self.backbone_dim = backbone_dim
