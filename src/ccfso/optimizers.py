@@ -469,6 +469,13 @@ def create_optimizer(model: torch.nn.Module,
             momentum=kwargs.get('momentum', 0.9),
             **kwargs
         )
+    elif optimizer_name == 'adamw':
+        return optim.AdamW(
+            model.parameters(),
+            lr=lr,
+            weight_decay=weight_decay,
+            **kwargs
+        )
     else:
         raise ValueError(f"Unknown optimizer: {optimizer_name}")
 
