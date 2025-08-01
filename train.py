@@ -47,7 +47,7 @@ def parse_args():
                       help='Dataset to use')
     parser.add_argument('--data_root', type=str, default='./data',
                       help='Root directory for datasets')
-    parser.add_argument('--image_size', type=int, default=224,
+    parser.add_argument('--image_size', type=int, default=384,
                       help='Input image size')
     
     # Model arguments
